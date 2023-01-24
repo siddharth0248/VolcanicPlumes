@@ -70,6 +70,7 @@ for (i in seq_along(files)) {
                        breaks = seq(0, 0.03, 0.005)) +
     xlab("Bending angle (rad)") + ylab("Pressure (mb)") +
     theme_bw()
+  
   #Plot for locations
   b <- ggplot() +
     geom_point(data = Loc, aes(x = Lon, y = Lat), color = "black") +
