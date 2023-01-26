@@ -26,10 +26,11 @@ library(rgdal) # package for geospatial analysis
 library(ggplot2) # package for plotting
 library(sf) # optional
 library(ggpubr) # used to arrange ggplot
+library(lubridate)
 
 #Open all files
 files = list.files(
-  "/Volumes/UAH/Impact/DIA/SPIRE/Data/Volcano/",
+  "/Volumes/UAH/Impact/DIA/SPIRE/Data/Volcano/2022/",
   pattern = '*.nc',
   full.names = TRUE,
   recursive = T
@@ -52,11 +53,17 @@ for (i in seq_along(files)) {
   MMDDYYYY <<- paste(month, day, year, sep = "/")
   
   #Retrieving variables of interest
+  bScore <- ncvar_get(nc_data, "bScore")
+  bScore <- round(bScore,digits = 1)
+  if(bScore>35){
+    next
+  }
   Bend_ang <- ncvar_get(nc_data, "Bend_ang")
   R_LEO <- ncvar_get(nc_data, "R_LEO")
   Impact_parm <- ncvar_get(nc_data, "Impact_parm")
   Pres <- ncvar_get(nc_data, "Pres")
   Comparision <- as.data.frame(cbind(Bend_ang, Pres))
+  Temp <- ncvar_get(nc_data, "Temp")
   
   Lon <- ncvar_get(nc_data, "Lon")
   Lat <- ncvar_get(nc_data, "Lat")
@@ -65,7 +72,8 @@ for (i in seq_along(files)) {
   #Plot for Bending angle and pressure
   a <-  ggplot(data = Comparision, aes(x = Bend_ang, y = Pres)) +
     geom_line() + # make this a line plot
-    scale_y_reverse() + #reverse the pressure scale
+    scale_y_reverse(limits = c(1000, 0),
+                       breaks = seq(0, 1000, 250)) +
     scale_x_continuous(limits = c(0, 0.03),
                        breaks = seq(0, 0.03, 0.005)) +
     xlab("Bending angle (rad)") + ylab("Pressure (mb)") +
@@ -99,8 +107,11 @@ for (i in seq_along(files)) {
     )
   
   #adding common title to both the plots
-  print(annotate_figure(figure, top = text_grob(
-    paste("Bending angle at different pressure levels on ", MMDDYYYY, sep = "")),
+    print(annotate_figure(figure, top = text_grob(
+    paste("Bending angle at different pressure levels on ", MMDDYYYY, " and score ",bScore, sep = "")),
     bottom = text_grob("Data source: \n Spire Level 2 RO Atmospheric Profile", color = "blue",
                      hjust = 1, x = 1, face = "italic", size = 10))) # use the black and white theme
+    
+    #d <- mdy(MMDDYYYY)
+    #ggsave(p, file=paste0("Pressure_",d,".png"), width = 14, height = 10, units = "cm",bg = "white")
 }
