@@ -54,8 +54,8 @@ for (i in seq_along(files)) {
   
   #Retrieving variables of interest
   bScore <- ncvar_get(nc_data, "bScore")
-  bScore <- round(bScore,digits = 1)
-  if(bScore>35){
+  bScore <- round(bScore, digits = 1)
+  if (bScore > 35) {
     next
   }
   Bend_ang <- ncvar_get(nc_data, "Bend_ang")
@@ -73,7 +73,7 @@ for (i in seq_along(files)) {
   a <-  ggplot(data = Comparision, aes(x = Bend_ang, y = Pres)) +
     geom_line() + # make this a line plot
     scale_y_reverse(limits = c(1000, 0),
-                       breaks = seq(0, 1000, 250)) +
+                    breaks = seq(0, 1000, 250)) +
     scale_x_continuous(limits = c(0, 0.03),
                        breaks = seq(0, 0.03, 0.005)) +
     xlab("Bending angle (rad)") + ylab("Pressure (mb)") +
@@ -86,8 +86,8 @@ for (i in seq_along(files)) {
                aes(x = Lon, y = Lat),
                color = "red",
                size = 4) + #volcanic erruption
-    scale_x_continuous(limits = c(-157,-153),
-                       breaks = seq(-157,-153, 0.5)) +
+    scale_x_continuous(limits = c(-157, -153),
+                       breaks = seq(-157, -153, 0.5)) +
     scale_y_continuous(limits = c(18, 21), breaks = seq(18, 21, 0.5)) +
     theme(axis.text.x = element_text(
       angle = 90,
@@ -107,11 +107,27 @@ for (i in seq_along(files)) {
     )
   
   #adding common title to both the plots
-    print(annotate_figure(figure, top = text_grob(
-    paste("Bending angle at different pressure levels on ", MMDDYYYY, " and score ",bScore, sep = "")),
-    bottom = text_grob("Data source: \n Spire Level 2 RO Atmospheric Profile", color = "blue",
-                     hjust = 1, x = 1, face = "italic", size = 10))) # use the black and white theme
-    
-    #d <- mdy(MMDDYYYY)
-    #ggsave(p, file=paste0("Pressure_",d,".png"), width = 14, height = 10, units = "cm",bg = "white")
+  print(annotate_figure(
+    figure,
+    top = text_grob(
+      paste(
+        "Bending angle at different pressure levels on ",
+        MMDDYYYY,
+        " and score ",
+        bScore,
+        sep = ""
+      )
+    ),
+    bottom = text_grob(
+      "Data source: \n Spire Level 2 RO Atmospheric Profile",
+      color = "blue",
+      hjust = 1,
+      x = 1,
+      face = "italic",
+      size = 10
+    )
+  )) # use the black and white theme
+  
+  d <- mdy(MMDDYYYY)
+  ggsave(p, file=paste0("Pressure_",d,".png"), width = 14, height = 10, units = "cm",bg = "white")
 }
