@@ -129,5 +129,5 @@ for (i in seq_along(files)) {
   )) # use the black and white theme
   
   d <- mdy(MMDDYYYY)
-  ggsave(p, file=paste0("Pressure_",d,".png"), width = 14, height = 10, units = "cm",bg = "white")
+  #ggsave(p, file=paste0("Pressure_",d,".png"), width = 14, height = 10, units = "cm",bg = "white")
 }

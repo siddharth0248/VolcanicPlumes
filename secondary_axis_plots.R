@@ -27,6 +27,7 @@ library(ggplot2) # package for plotting
 library(sf) # optional
 library(ggpubr) # used to arrange ggplot
 library(lubridate)
+library(signal) ##smoothing
 
 #Open all files
 files = list.files(
@@ -64,7 +65,8 @@ for (i in seq_along(files)) {
   Pres <- ncvar_get(nc_data, "Pres")
   Temp <- ncvar_get(nc_data, "Temp")
   Comparision <- as.data.frame(cbind(Bend_ang, Pres,Temp))
-  
+  Comparision <- Comparision %>%
+                 mutate(Sm = sgolayfilt(Comparision$Bend_ang,4))
   Lon <- ncvar_get(nc_data, "Lon")
   Lat <- ncvar_get(nc_data, "Lat")
   Loc <- as.data.frame(cbind(Lat, Lon))
@@ -90,14 +92,16 @@ for (i in seq_along(files)) {
   
   
   #Plot for Bending angle and pressure
-  a <-  ggplot(data = Comparision, aes(x = Bend_ang, y = Pres)) +
+  a <-  ggplot(data = Comparision, aes(x = Sm, y = Pres)) +
     geom_line(aes(color = "Pressure")) + # make this a line plot
     geom_line(aes(y = inv_scale_function(Temp, scale, shift),color = "Temperature"))+
     #scale_y_reverse(limits = c(1000, 0),
     #                breaks = seq(0, 1000, 250)) +
     #scale_y_continuous(limits = c(min_first, max_first), sec.axis = sec_axis(~scale_function(., scale, shift), name="Temperature (K)"))+
     scale_y_reverse(limits = c(max_first, min_first),
-                    breaks = seq(0, 1000, 250),sec.axis = sec_axis(~scale_function(., scale, shift), name="Temperature (K)")) +
+                    breaks = seq(0, 1000, 250),
+                    sec.axis = sec_axis(~scale_function(., scale, shift), name="Temperature (K)",
+                                        breaks = seq(150,300,20))) +
     scale_x_continuous(limits = c(0, 0.03),
                        breaks = seq(0, 0.03, 0.005)) +
     labs(x = "Bending angle (rad)", y = "Pressure (mb)", color = "") +
@@ -127,7 +131,7 @@ for (i in seq_along(files)) {
       hjust = 1
     ))
   
-  #arranging both plots in one figure using ggrange
+   #arranging both plots in one figure using ggrange
   figure <-
     ggarrange(
       a,
@@ -139,7 +143,7 @@ for (i in seq_along(files)) {
     )
   
   #adding common title to both the plots
-  print(annotate_figure(
+  p<-(annotate_figure(
     figure,
     top = text_grob(
       paste(
@@ -161,5 +165,9 @@ for (i in seq_along(files)) {
   )) # use the black and white theme
   
   d <- mdy(MMDDYYYY)
-  ggsave(p, file=paste0("Pressure_",d,".png"), width = 14, height = 10, units = "cm",bg = "white")
+  ggsave(p, file=paste0(d,"_Pressure_",bScore,".png"), width = 14, height = 10, units = "cm",bg = "white")
+  y<- Comparision$Pres
+  x <- Comparision$Bend_ang
+  test(2, 0.05)
 }
+
